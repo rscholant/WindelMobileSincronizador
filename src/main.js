@@ -19,7 +19,8 @@ var idPedidos = [];
 module.exports = async (newDirPath, serverUrl, currentVersion) => {
   dirPath = newDirPath;
   log.setDirPath(dirPath);
-
+  let timeoutGet = 1;
+  let timoutPost = 1;
   await checkInstalation(dirPath, log);
 
   var firebird = new (require("./common/firebird"))();
@@ -108,6 +109,8 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
       });
 
       if (result.data.result) {
+        timeoutGet =
+          result.data.remaining && result.data.remaining > 0 ? 1 : 60000;
         if (result.data.data.length > 0) {
           for (var i = 0; i < result.data.data.length; i++) {
             var modification = result.data.data[i];
@@ -236,7 +239,17 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
           [],
           ["uuid", "tabela", "data_operacao", "situacao", "sincronizado"]
         );
+        var count = await firebird.query(
+          `
+                select count(*) as CONTADOR
+                    from replic_data_status
+                    where sincronizado = 0
+                `,
+          [],
+          ["CONTADOR"]
+        );
 
+        timoutPost = count[0].CONTADOR && count[0].CONTADOR > 0 ? 1 : 60000;
         for (var key in results) {
           var toSend = results[key];
           toSend.dados = null;
@@ -288,9 +301,12 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
 
     isProcessing = false;
 
-    setTimeout(() => {
-      run();
-    }, 60000);
+    setTimeout(
+      () => {
+        run();
+      },
+      timeoutGet <= timoutPost ? timeoutGet : timoutPost
+    );
   }
 
   await run();
