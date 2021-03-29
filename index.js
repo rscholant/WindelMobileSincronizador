@@ -14,11 +14,11 @@ process.on("uncaughtException", (err) => {
 });
 //force NON DEV environment
 //dirPath = path.dirname(process.execPath);
-enviromentDev = false;
+//enviromentDev = false;
 
 //force DEV enviroment
 //dirPath = __dirname;
-//enviromentDev = true;
+enviromentDev = true;
 
 var serverUrl = enviromentDev
   ? "http://127.0.0.1:3000"
