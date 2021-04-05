@@ -15,16 +15,18 @@ process.on("uncaughtException", (err) => {
 //force NON DEV environment
 //dirPath = path.dirname(process.execPath);
 enviromentDev = false;
-
+enviromentIntegrador = true;
 //force DEV enviroment
 //dirPath = __dirname;
 //enviromentDev = true;
 
 var serverUrl = enviromentDev
   ? "http://127.0.0.1:3000"
-  : "http://18.229.33.13:3000";
+  : enviromentIntegrador
+  ? "http://18.229.142.255:3000" //INTEGRADOR
+  : "http://18.229.33.13:3000"; //MOBILE
 
-var version = "21.03.03";
+var version = "21.04.01";
 
 if (process.argv.length <= 2) {
   require("./src/main.js")(dirPath, serverUrl, version);

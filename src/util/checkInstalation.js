@@ -43,17 +43,6 @@ async function installSincUUIDOnTable(tabela_nome) {
     []
   );
 
-  // var hasRowsToUpdate = true;
-  // var times = 0;
-  // while(hasRowsToUpdate){
-  //     await firebirdInstance.execute(`UPDATE ${tabela_nome} SET SINC_UUID = UUID_TO_CHAR(GEN_UUID()) WHERE SINC_UUID IS NULL ROWS 1000`, []);
-  //     var result = await firebirdInstance.query(`SELECT first 1 '1' as total FROM ${tabela_nome} WHERE SINC_UUID IS NULL`, [], ["total"]);
-  //     console.log('processing table:'+(times++*1000));
-  //     if(result.length == 0){
-  //         hasRowsToUpdate = false;
-  //     }
-  // }
-
   var trigger_nome_uuid = `uuid_${tabela_nome}`;
   if (trigger_nome_uuid.length >= 31) {
     var hash = md5(tabela_nome);
@@ -97,7 +86,7 @@ async function installTriggers() {
       tabela.nome = tabela.nome.trim();
 
       var tabelasPrioritarias = [
-        "EMPRESAS",
+        "TITULOS",
         "MOBILE_PEDIDO_PRODUTOS",
         "MOBILE_CLIENTE_ENDERECO",
         "MOBILE_CLIENTE",
@@ -112,9 +101,11 @@ async function installTriggers() {
         "OBSPESSOAS",
         "USUARIOS",
         "PESSOAS",
-        "TITULOS",
+        "EMPRESAS",
       ];
       var tabelasExcluidas = [
+        "ALTERACOES",
+        "ATRIBUTOS_ACESSOS",
         "DOCS",
         "DOCS_LOG",
         "DOCSADICIONAIS",
@@ -517,6 +508,7 @@ async function replicInstall(version) {
                 SINCRONIZADO SMALLINT
             )
         `);
+    await firebirdInstance.execute(`DELETE FROM REPLIC_DATA_STATUS`, []);
     await firebirdInstance.execute(
       `EXECUTE block as
         BEGIN
@@ -663,6 +655,17 @@ async function replicInstall(version) {
     await updateVersionOnDb(version);
   }
 
+  if (version < 10) {
+    await firebirdInstance.execute(
+      `
+      DELETE FROM MOBILE_PEDIDO_PRODUTOS
+        WHERE IDPEDIDO NOT IN (SELECT IDPEDIDO FROM MOBILE_PEDIDO)
+    `,
+      []
+    );
+    version = 10;
+    await updateVersionOnDb(version);
+  }
   if (version < 999) {
     console.log("Atualizando triggers");
     await installTriggers();
