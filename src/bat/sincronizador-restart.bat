@@ -1,0 +1,9 @@
+@ECHO OFF
+
+SET SERVICENAME="Windel Sincronizador"
+SET NSSM="%~dp0\nssm.exe"
+
+ECHO RESTARTING SERVICE %SERVICENAME%
+
+%NSSM% stop %SERVICENAME%
+%NSSM% start %SERVICENAME%

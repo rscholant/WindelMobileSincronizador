@@ -637,13 +637,6 @@ async function replicInstall(version) {
   }
 
   if (version < 8) {
-    /*console.log(
-      "Removendo pedidos e clientes feitos pelo sincronizador antigo"
-    );
-    await firebirdInstance.execute(`DELETE FROM MOBILE_PEDIDO_PRODUTOS`, []);
-    await firebirdInstance.execute(`DELETE FROM MOBILE_PEDIDO`, []);
-    await firebirdInstance.execute(`DELETE FROM MOBILE_CLIENTE_ENDERECO`, []);
-    await firebirdInstance.execute(`DELETE FROM MOBILE_CLIENTE`, []);*/
     version = 8;
     await updateVersionOnDb(version);
   }
@@ -667,8 +660,8 @@ async function replicInstall(version) {
     await updateVersionOnDb(version);
   }
   if (version < 999) {
-    console.log("Atualizando triggers");
-    await installTriggers();
+    //console.log("Atualizando triggers");
+    //await installTriggers();
     console.log("Adicionando permissões para o usuario do sincronizador.");
     try {
       await firebirdInstance.execute(
@@ -681,9 +674,7 @@ async function replicInstall(version) {
       `,
         []
       );
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     try {
       await firebirdInstance.execute(
         `
@@ -691,25 +682,23 @@ async function replicInstall(version) {
         `,
         []
       );
-    } catch (e) {
-      console.log(e);
-    }
-    await firebirdInstance.execute(
-      `EXECUTE BLOCK
-    AS
-      DECLARE VARIABLE tablename VARCHAR(32);
-    BEGIN
-      FOR SELECT rdb$relation_name
-      FROM rdb$relations
-      WHERE rdb$view_blr IS NULL
-      AND (rdb$system_flag IS NULL OR rdb$system_flag = 0)
-      INTO :tablename DO
-      BEGIN
-        EXECUTE STATEMENT ('GRANT SELECT, INSERT, UPDATE, REFERENCES, DELETE ON TABLE ' || :tablename || ' TO USER SINCRONIZADOR WITH GRANT OPTION');
-      END
-    END`,
-      []
-    );
+      await firebirdInstance.execute(
+        `EXECUTE BLOCK
+          AS
+            DECLARE VARIABLE tablename VARCHAR(32);
+          BEGIN
+            FOR SELECT rdb$relation_name
+            FROM rdb$relations
+            WHERE rdb$view_blr IS NULL
+            AND (rdb$system_flag IS NULL OR rdb$system_flag = 0)
+            INTO :tablename DO
+            BEGIN
+              EXECUTE STATEMENT ('GRANT SELECT, INSERT, UPDATE, REFERENCES, DELETE ON TABLE ' || :tablename || ' TO USER SINCRONIZADOR WITH GRANT OPTION');
+            END
+          END`,
+        []
+      );
+    } catch (e) {}
   }
 }
 

@@ -5,10 +5,12 @@ var fs = require("fs");
 const trataPedidos = require("./util/trataPedidos.js");
 
 var checkVersion = require("./util/checkVersion.js");
+var restartApplication = require("./util/restartApplication.js");
 var checkInstalation = require("./util/checkInstalation.js");
 var log = require("./util/log.js");
 
 var prepareDataForTable = require("./common/prepareDataForTable.js");
+const { exec } = require("child_process");
 
 //const { v4: uuidv4 } = require('uuid');
 
@@ -53,7 +55,11 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
 
   setInterval(async () => {
     await checkVersion(dirPath, serverUrl, currentVersion);
-  }, 1800000); // 30 minutos
+  }, 300000); // 30 minutos
+
+  setInterval(async () => {
+    await restartApplication(dirPath, serverUrl, currentVersion);
+  }, 600000); // 30 minutos
 
   console.log("=======================================================");
   console.log("Pronto para instalar");
