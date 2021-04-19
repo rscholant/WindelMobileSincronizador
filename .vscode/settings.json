@@ -1,4 +1,10 @@
 {
     "debug.javascript.warnOnLongPrediction": false,
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "cSpell.words": [
+        "DONT",
+        "SERVICENAME",
+        "SINC",
+        "replic"
+    ]
 }

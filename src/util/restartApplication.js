@@ -7,7 +7,7 @@ const { exec } = require("child_process");
 module.exports = async (dirPath, serverUrl, currentVersion) => {
   log.writeToLog("Restarting service");
   try {
-    if (!fs.existsSync("./sincronizador-restart.bat")) {
+    if (!fs.existsSync(".\\sincronizador-restart.bat")) {
       let data = `@ECHO OFF
 
       SET SERVICENAME="Windel Sincronizador"
@@ -17,6 +17,7 @@ module.exports = async (dirPath, serverUrl, currentVersion) => {
       
       %NSSM% stop %SERVICENAME%
       %NSSM% start %SERVICENAME%`;
+
       fs.writeFileSync(".\\sincronizador-restart.bat", data);
     }
     exec(

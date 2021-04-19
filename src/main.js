@@ -12,8 +12,6 @@ var log = require("./util/log.js");
 var prepareDataForTable = require("./common/prepareDataForTable.js");
 const { exec } = require("child_process");
 
-//const { v4: uuidv4 } = require('uuid');
-
 //var isProcessing = false;
 var canProcessAgain = true;
 var idPedidos = [];
@@ -89,7 +87,7 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
 
     try {
       var canPush = false;
-      var configAuth = fs.readFileSync(dirPath + "/sincronizador.cfg", {
+      var configAuth = fs.readFileSync(dirPath + "\\sincronizador.cfg", {
         encoding: "utf8",
       });
       if (configAuth == "") {
@@ -116,7 +114,7 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
 
       if (result.data.result) {
         timeoutGet =
-          result.data.remaining && result.data.remaining > 0 ? 1 : 60000;
+          result.data.remaining && result.data.remaining > 0 ? 1 : 300000;
         if (result.data.data.length > 0) {
           for (var i = 0; i < result.data.data.length; i++) {
             var modification = result.data.data[i];
@@ -192,9 +190,7 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
               //deleting locally
 
               await firebird.execute(
-                `
-                                DELETE FROM ${modification.tabela} WHERE SINC_UUID = ?
-                            `,
+                ` DELETE FROM ${modification.tabela} WHERE SINC_UUID = ?`,
                 params
               );
 
@@ -219,13 +215,11 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
       //update date since last pull
       config.date_since_last_pull = result.data.next_since;
       await firebird.execute(
-        `
-                UPDATE OR INSERT INTO REPLIC_CONFIG (CHAVE, VALOR) VALUES (?,?)
-            `,
+        ` UPDATE OR INSERT INTO REPLIC_CONFIG (CHAVE, VALOR) VALUES (?,?) `,
         ["date_since_last_pull", config.date_since_last_pull + ""]
       );
 
-      //reenable replication on session
+      //re enable replication on session
       await firebird.execute(
         "select rdb$set_context('USER_SESSION', 'DONT_TRIGGER_REPLIC', null) from rdb$database",
         []
@@ -255,7 +249,7 @@ module.exports = async (newDirPath, serverUrl, currentVersion) => {
           ["CONTADOR"]
         );
 
-        timoutPost = count[0].CONTADOR && count[0].CONTADOR > 0 ? 1 : 60000;
+        timoutPost = count[0].CONTADOR && count[0].CONTADOR > 0 ? 1 : 300000;
         for (var key in results) {
           var toSend = results[key];
           toSend.dados = null;
